@@ -59,11 +59,14 @@ def serve_video(filename):
 
 @app.route('/export', methods=['POST'])
 def export_ratings():
-    data = request.json
-    ratings = data.get('ratings', {})
-    ratings = {video: int(rating) for video, rating in ratings.items()}
-    save_ratings(ratings)
-    return jsonify({'status': 'saved'})
+    try:
+        data = request.json
+        ratings = data.get('ratings', {})
+        ratings = {video: int(rating) for video, rating in ratings.items()}
+        save_ratings(ratings)
+        return jsonify({'status': 'saved'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 if __name__ == '__main__':
