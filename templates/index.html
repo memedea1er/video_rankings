@@ -7,45 +7,54 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1 class="header">Видеофрагменты:</h1>
+    <div class="main-container">
+        <div class="file-list-container">
+        <div class="header-row">
+            <h1 class="header">Видеофрагменты:</h1>
+            <button id="export-btn" class="export-button">Экспорт в CSV</button>
+        </div>
+            <ul class="video-list">
+                {% for video in videos %}
+                <li class="video-item">
+                    <span class="video-title" onclick="playVideo('{{ video }}')">{{ video }}</span>
+                    <span class="rating-status" data-video="{{ video }}">
+                        {% if ratings.get(video, 0)|int >= 1 %}
+                            Оценено
+                        {% else %}
+                            Не оценено
+                        {% endif %}
+                    </span>
+                </li>
+                {% else %}
+                <li class="no-videos">Видео не найдены</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-        <ul class="video-list">
-            {% for video in videos %}
-            <li class="video-item">
-                <span class="video-title" onclick="playVideo('{{ video }}')">{{ video }}</span>
-                <input type="number"
-                       class="rating-input"
-                       min="1"
-                       max="5"
-                       value="{{ ratings.get(video, 0) }}"
-                       data-video="{{ video }}">
-            </li>
-            {% else %}
-            <li class="no-videos">Видео не найдены</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div id="video-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="video-title"></h2>
-            <video id="video-player" controls autoplay>
-                Your browser does not support the video tag.
-            </video>
-            <div class="modal-rating">
-                <input type="number"
-                       id="modal-rating-input"
-                       min="1"
-                       max="5"
-                       value="0">
+        <div class="video-container" id="video-container">
+            <div class="video-placeholder" id="video-placeholder">
+                <p>Выберите видео для просмотра</p>
+            </div>
+            <div class="video-content" id="video-content" style="display: none;">
+                <span class="close-video-btn" id="close-video-btn">&times;</span>
+                <h2 id="video-title"></h2>
+                <video id="video-player" controls autoplay>
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-rating">
+                    <input type="number"
+                           id="video-rating-input"
+                           min="1"
+                           max="5"
+                           value="0">
+                </div>
             </div>
         </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-
-    <button id="export-btn">Экспорт в CSV</button>
+    <script>
+    const initialRatings = {{ ratings|tojson }};
+    </script>
 </body>
 </html>
