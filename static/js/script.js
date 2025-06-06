@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const videoRatingInput = document.getElementById('video-rating-input');
     const exportButton = document.getElementById('export-btn');
     const closeVideoBtn = document.getElementById('close-video-btn');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const videoItems = document.querySelectorAll('.video-item');
 
     const ratings = {};
     Object.assign(ratings, initialRatings);
@@ -31,6 +33,40 @@ document.addEventListener('DOMContentLoaded', function () {
     exportButton.addEventListener('click', function () {
         exportRatingsToCSV();
     });
+
+    // Обработчики для кнопок фильтрации
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Удаляем активный класс у всех кнопок
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            // Добавляем активный класс текущей кнопке
+            this.classList.add('active');
+
+            const filter = this.dataset.filter;
+            filterVideos(filter);
+        });
+    });
+
+    function filterVideos(filter) {
+        videoItems.forEach(item => {
+            const isRated = item.dataset.rated === 'true';
+            const videoName = item.dataset.video;
+            const currentRating = ratings[videoName] || 0;
+            const actuallyRated = currentRating >= 1;
+
+            switch(filter) {
+                case 'all':
+                    item.style.display = 'flex';
+                    break;
+                case 'rated':
+                    item.style.display = actuallyRated ? 'flex' : 'none';
+                    break;
+                case 'unrated':
+                    item.style.display = actuallyRated ? 'none' : 'flex';
+                    break;
+            }
+        });
+    }
 
     function playVideo(filename) {
         videoPlaceholder.style.display = 'none';
@@ -61,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
         videoPlayer.pause();
         videoPlayer.currentTime = 0;
 
-        // Очищаем источник видео
         while (videoPlayer.firstChild) {
             videoPlayer.removeChild(videoPlayer.firstChild);
         }
@@ -74,10 +109,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!isNaN(rating)) {
             ratings[video] = rating;
 
-            const statusSpan = document.querySelector(`.rating-status[data-video="${video}"]`);
+            const statusSpan = document.querySelector(`.video-item[data-video="${video}"] .rating-status`);
             if (statusSpan) {
                 statusSpan.textContent = (rating >= 1) ? 'Оценено' : 'Не оценено';
+                if (rating >= 1) {
+                    statusSpan.classList.add('rated');
+                } else {
+                    statusSpan.classList.remove('rated');
+                }
             }
+
+            const videoItem = document.querySelector(`.video-item[data-video="${video}"]`);
+            if (videoItem) {
+                videoItem.dataset.rated = (rating >= 1) ? 'true' : 'false';
+            }
+
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            filterVideos(activeFilter);
         }
     }
 
@@ -89,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 ratingsToExport[video] = rating;
             }
         }
-
 
         fetch('/export', {
             method: 'POST',
@@ -109,4 +156,5 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Произошла ошибка при экспорте');
             });
     }
+    filterVideos('all');
 });

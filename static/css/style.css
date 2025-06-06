@@ -139,10 +139,20 @@ body {
     padding: 20px;
 }
 
+.video-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.video-header h2 {
+    margin: 0;
+    padding-right: 10px;
+}
+
 .close-video-btn {
-    position: absolute;
-    top: 25px;
-    right: 25px;
+    position: static;
     font-size: 28px;
     cursor: pointer;
     color: #555;
@@ -153,7 +163,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    flex-shrink: 0;
 }
 
 .close-video-btn:hover {
@@ -172,11 +182,21 @@ body {
     color: #555;
 }
 
+.rating-status.rated {
+    color: #28a745;
+}
+
 .header-row {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
 }
 
 .header {
@@ -186,7 +206,7 @@ body {
 }
 
 .export-button {
-    padding: 8px 16px;
+    padding: 6px 12px;
     background: var(--primary);
     color: white;
     border: none;
@@ -197,4 +217,30 @@ body {
 
 .export-button:hover {
     background-color: #3651c7;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-btn {
+    padding: 6px 12px;
+    background: #e0e0e0;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.filter-btn:hover:not(.active) {
+    background: #d0d0d0;
 }

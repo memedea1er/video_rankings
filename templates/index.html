@@ -11,13 +11,18 @@
         <div class="file-list-container">
         <div class="header-row">
             <h1 class="header">Видеофрагменты:</h1>
-            <button id="export-btn" class="export-button">Экспорт в CSV</button>
+            <div class="filter-controls">
+                <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="rated">Оценено</button>
+                <button class="filter-btn" data-filter="unrated">Не оценено</button>
+                <button id="export-btn" class="export-button">Экспорт в CSV</button>
+            </div>
         </div>
             <ul class="video-list">
                 {% for video in videos %}
-                <li class="video-item">
+                <li class="video-item" data-rated="{{ ratings.get(video, 0)|int >= 1 }}" data-video="{{ video }}">
                     <span class="video-title" onclick="playVideo('{{ video }}')">{{ video }}</span>
-                    <span class="rating-status" data-video="{{ video }}">
+                    <span class="rating-status {% if ratings.get(video, 0)|int >= 1 %}rated{% endif %}">
                         {% if ratings.get(video, 0)|int >= 1 %}
                             Оценено
                         {% else %}
@@ -36,8 +41,10 @@
                 <p>Выберите видео для просмотра</p>
             </div>
             <div class="video-content" id="video-content" style="display: none;">
-                <span class="close-video-btn" id="close-video-btn">&times;</span>
-                <h2 id="video-title"></h2>
+                <div class="video-header">
+                    <h2 id="video-title"></h2>
+                    <span class="close-video-btn" id="close-video-btn">&times;</span>
+                </div>
                 <video id="video-player" controls autoplay>
                     Your browser does not support the video tag.
                 </video>
