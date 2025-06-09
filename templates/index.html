@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Browser</title>
+    <title>Video Rating Tool</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="main-container">
         <div class="file-list-container">
-        <div class="header-row">
-            <h1 class="header">Видеофрагменты:</h1>
-            <div class="filter-controls">
-                <button class="filter-btn active" data-filter="all">Все</button>
-                <button class="filter-btn" data-filter="rated">Оценено</button>
-                <button class="filter-btn" data-filter="unrated">Не оценено</button>
-                <button id="export-btn" class="export-button">Экспорт в CSV</button>
+            <div class="header-row">
+                <h1 class="header">Видеофрагменты:</h1>
+                <div class="filter-controls">
+                    <button class="filter-btn active" data-filter="all">Все</button>
+                    <button class="filter-btn" data-filter="rated">Оценено</button>
+                    <button class="filter-btn" data-filter="unrated">Не оценено</button>
+                    <button id="export-btn" class="export-button">Экспорт в CSV</button>
+                </div>
             </div>
-        </div>
             <ul class="video-list">
                 {% for video in videos %}
                 <li class="video-item" data-rated="{{ ratings.get(video, 0)|int >= 1 }}" data-video="{{ video }}">
                     <span class="video-title" onclick="playVideo('{{ video }}')">{{ video }}</span>
                     <span class="rating-status {% if ratings.get(video, 0)|int >= 1 %}rated{% endif %}">
                         {% if ratings.get(video, 0)|int >= 1 %}
-                            Оценено
+                            Оценено ({{ ratings.get(video, 0) }} оценок)
                         {% else %}
                             Не оценено
                         {% endif %}
@@ -48,12 +48,46 @@
                 <video id="video-player" controls autoplay>
                     Your browser does not support the video tag.
                 </video>
-                <div class="video-rating">
-                    <input type="number"
-                           id="video-rating-input"
-                           min="1"
-                           max="5"
-                           value="0">
+
+                <div class="rating-controls">
+                    <div class="time-controls-start">
+                        <label for="start-time">Начало:</label>
+                        <input type="text" id="start-time" placeholder="мм:сс" value="0:00">
+                    </div>
+
+                    <div class="time-controls-end">
+                        <label for="end-time">Конец:</label>
+                        <input type="text" id="end-time" placeholder="мм:сс" value="0:00">
+                    </div>
+
+                    <div class="rating-inputs-score">
+                        <label for="rating-value">Оценка:</label>
+                        <input type="number" id="rating-value" min="1" max="5" value="1">
+                    </div>
+
+                    <div class="rating-inputs-limb">
+                        <label for="limb-value">Конечность:</label>
+                        <input type="number" id="limb-value" min="0" max="4" value="0">
+                    </div>
+
+                    <button id="add-rating-btn" class="add-rating-button">Добавить оценку</button>
+                </div>
+                <h3>Оценки для этого видео:</h3>
+
+                <div class="ratings-table-container">
+                    <table class="ratings-table" id="ratings-table">
+                        <thead>
+                            <tr>
+                                <th>Начало:</th>
+                                <th>Конец:</th>
+                                <th>Оценка</th>
+                                <th>Конечность</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratings-table-body">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -61,7 +95,7 @@
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script>
-    const initialRatings = {{ ratings|tojson }};
+    const initialRatings = {{ initialRatings|tojson|safe }};
     </script>
 </body>
 </html>
