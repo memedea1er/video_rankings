@@ -27,7 +27,7 @@ body {
 .file-list-container {
     flex: 1;
     background: white;
-    padding: 20px;
+    padding: 0 20px 20px 20px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
@@ -57,11 +57,6 @@ body {
     max-width: 100%;
 }
 
-.header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
 .video-list {
     list-style: none;
     padding: 0;
@@ -83,9 +78,11 @@ body {
     background: #e9ecef;
 }
 
+.video-item {
+    cursor: pointer;
+}
 
 .video-title {
-    cursor: pointer;
     padding-right: 10px;
     flex-grow: 1;
 }
@@ -94,13 +91,9 @@ body {
     color: #28a745;
 }
 
-.verification-needed {
-    color: #ff9800;
-    font-weight: bold;
-}
-
-.rating-status.rated .verification-needed {
-    display: inline !important;
+.verification-part {
+    color: #ff9d1d;
+    margin-left: 5px;
 }
 
 #video-player {
@@ -156,6 +149,7 @@ body {
 
 
 .header-row {
+    flex-direction: column;
     position: sticky;
     top: 0;
     background: white;
@@ -163,14 +157,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
+    padding: 20px 0 10px 0;
     margin-bottom: 10px;
     border-bottom: 1px solid #ddd;
 }
 
 .header {
     text-align: left;
-    margin: 0;
+    margin: 0 0 10px 0;
     font-size: 1.5em;
 }
 

@@ -22,9 +22,15 @@ document.addEventListener('DOMContentLoaded', function () {
     loadVideoRatings();
 
     // Обработчик клика по названию видео
-    videoTitles.forEach(title => {
-        title.addEventListener('click', function () {
-            const videoFile = this.textContent;
+    videoItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-rating-btn') ||
+                e.target.tagName === 'BUTTON' ||
+                e.target.tagName === 'INPUT') {
+                return;
+            }
+
+            const videoFile = this.dataset.video;
             playVideo(videoFile);
         });
     });
@@ -72,6 +78,8 @@ document.addEventListener('DOMContentLoaded', function () {
         videoItems.forEach(item => {
             const videoName = item.dataset.video;
             const hasRatings = videoRatings[videoName] && videoRatings[videoName].length > 0;
+            const needsVerificationCount = hasRatings ?
+                videoRatings[videoName].filter(r => r.needsVerification).length : 0;
 
             switch (filter) {
                 case 'all':
@@ -83,12 +91,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'unrated':
                     item.style.display = hasRatings ? 'none' : 'flex';
                     break;
+                case 'needs-verification':
+                    item.style.display = needsVerificationCount > 0 ? 'flex' : 'none';
+                    break;
             }
 
             const statusSpan = item.querySelector('.rating-status');
             if (statusSpan) {
                 if (hasRatings) {
-                    statusSpan.textContent = `Оценено (${videoRatings[videoName].length})`;
+                    let statusHTML = `<span class="rated-part">Оценено (${videoRatings[videoName].length})</span>`;
+
+                    if (needsVerificationCount > 0) {
+                        statusHTML += `, <span class="verification-part">Нужна верификация (${needsVerificationCount})</span>`;
+                    }
+
+                    statusSpan.innerHTML = statusHTML;
                     statusSpan.classList.add('rated');
                     item.dataset.rated = 'true';
                 } else {
@@ -230,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const verificationCheckbox = document.createElement('input');
         verificationCheckbox.type = 'checkbox';
         verificationCheckbox.checked = ratingData.needsVerification || false;
-        verificationCheckbox.addEventListener('change', function() {
+        verificationCheckbox.addEventListener('change', function () {
             videoRatings[video][index].needsVerification = this.checked;
             saveVideoRatings();
         });

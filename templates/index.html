@@ -15,23 +15,22 @@
                     <button class="filter-btn active" data-filter="all">Все</button>
                     <button class="filter-btn" data-filter="rated">Оценено</button>
                     <button class="filter-btn" data-filter="unrated">Не оценено</button>
+                    <button class="filter-btn" data-filter="needs-verification">Нужна верификация</button>
                     <button id="export-btn" class="export-button">Экспорт в CSV</button>
                 </div>
             </div>
             <ul class="video-list">
                 {% for video in videos %}
                 <li class="video-item" data-rated="{{ ratings.get(video, 0)|int >= 1 }}" data-video="{{ video }}">
-                    <span class="video-title" onclick="playVideo('{{ video }}')">{{ video }}</span>
+                    <span class="video-title">{{ video }}</span>
                     <span class="rating-status {% if ratings.get(video, 0)|int >= 1 %}rated{% endif %}">
                         {% if ratings.get(video, 0)|int >= 1 %}
-                            Оценено ({{ ratings.get(video, 0) }} оценок)
+                            Оценено ({{ ratings.get(video, 0) }})
                         {% else %}
                             Не оценено
                         {% endif %}
                     </span>
                 </li>
-                {% else %}
-                <li class="no-videos">Видео не найдены</li>
                 {% endfor %}
             </ul>
         </div>
