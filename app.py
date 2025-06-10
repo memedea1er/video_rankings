@@ -51,7 +51,7 @@ def export_ratings():
                         rating['endTimeStr'],
                         rating['rating'],
                         rating['limb'],
-                        'true' if rating.get('needsVerification', False) else 'false'
+                        rating['needsVerification']
                     ])
 
         return jsonify({
@@ -80,7 +80,7 @@ def import_ratings():
             csv_reader = csv.reader(f)
 
             for row in csv_reader:
-                if len(row) < 5:  # Minimum required fields
+                if len(row) < 5:
                     continue
 
                 video_name = row[0]
@@ -88,11 +88,7 @@ def import_ratings():
                 end_time_str = row[2]
                 rating = int(row[3])
                 limb = int(row[4])
-
-                # Handle verification flag
-                needs_verification = False
-                if len(row) > 5:
-                    needs_verification = row[5].lower() == 'true'
+                needs_verification = row[5] == 'True'
 
                 if video_name not in ratings_data:
                     ratings_data[video_name] = []
