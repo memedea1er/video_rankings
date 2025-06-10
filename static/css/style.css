@@ -29,7 +29,7 @@ body {
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
 }
 
@@ -38,7 +38,7 @@ body {
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
 }
@@ -83,10 +83,24 @@ body {
     background: #e9ecef;
 }
 
+
 .video-title {
     cursor: pointer;
     padding-right: 10px;
     flex-grow: 1;
+}
+
+.rating-status.rated {
+    color: #28a745;
+}
+
+.verification-needed {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.rating-status.rated .verification-needed {
+    display: inline !important;
 }
 
 #video-player {
@@ -140,9 +154,6 @@ body {
     color: #555;
 }
 
-.rating-status.rated {
-    color: #28a745;
-}
 
 .header-row {
     position: sticky;
@@ -252,6 +263,19 @@ body {
 .rating-controls input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.rating-inputs-verification {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rating-inputs-verification input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
 
 .rating-controls select {

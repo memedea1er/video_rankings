@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     break;
             }
 
-            // Update rating status text
             const statusSpan = item.querySelector('.rating-status');
             if (statusSpan) {
                 if (hasRatings) {
@@ -135,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ratingsTableBody.innerHTML = '';
     }
 
+
     function addRating() {
         const video = videoTitle.textContent;
         if (!video) return;
@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const endTimeStr = endTimeInput.value;
         const rating = parseInt(ratingValueInput.value);
         const limb = parseInt(limbValueSelect.value);
+        const needsVerification = document.getElementById('verification-checkbox').checked;
 
         // Преобразуем время из мм:сс в секунды
         const startTime = timeToSeconds(startTimeStr);
@@ -184,7 +185,8 @@ document.addEventListener('DOMContentLoaded', function () {
             startTimeStr,
             endTimeStr,
             rating,
-            limb
+            limb,
+            needsVerification
         };
 
         if (!videoRatings[video]) {
@@ -194,6 +196,9 @@ document.addEventListener('DOMContentLoaded', function () {
         saveVideoRatings();
 
         addRatingToTable(ratingData, videoRatings[video].length - 1);
+
+        // Сбрасываем чекбокс после добавления
+        document.getElementById('verification-checkbox').checked = false;
 
         const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
         filterVideos(activeFilter);
@@ -221,6 +226,17 @@ document.addEventListener('DOMContentLoaded', function () {
         limbCell.textContent = ratingData.limb;
         row.appendChild(limbCell);
 
+        const verificationCell = document.createElement('td');
+        const verificationCheckbox = document.createElement('input');
+        verificationCheckbox.type = 'checkbox';
+        verificationCheckbox.checked = ratingData.needsVerification || false;
+        verificationCheckbox.addEventListener('change', function() {
+            videoRatings[video][index].needsVerification = this.checked;
+            saveVideoRatings();
+        });
+        verificationCell.appendChild(verificationCheckbox);
+        row.appendChild(verificationCell);
+
         const actionsCell = document.createElement('td');
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Удалить';
@@ -235,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         row.scrollIntoView({behavior: 'smooth', block: 'end'});
     }
+
 
     function deleteRating(video, index) {
         if (videoRatings[video] && videoRatings[video][index]) {
