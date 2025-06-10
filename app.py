@@ -47,12 +47,11 @@ def export_ratings():
                 for rating in ratings:
                     writer.writerow([
                         video,
-                        # rating['startTime'],
-                        # rating['endTime'],
                         rating['startTimeStr'],
                         rating['endTimeStr'],
                         rating['rating'],
-                        rating['limb']
+                        rating['limb'],
+                        'true' if rating.get('needsVerification', False) else 'false'
                     ])
 
         return jsonify({
@@ -66,6 +65,72 @@ def export_ratings():
             'status': 'error',
             'message': f'Ошибка экспорта: {str(e)}'
         }), 500
+
+
+@app.route('/api/import-ratings', methods=['GET'])
+def import_ratings():
+    try:
+        ratings_file = app.config['RATINGS_FILE']
+        if not os.path.exists(ratings_file):
+            return jsonify({'status': 'error', 'message': 'Файл оценок не найден'}), 404
+
+        ratings_data = {}
+
+        with open(ratings_file, 'r', encoding='utf-8') as f:
+            csv_reader = csv.reader(f)
+
+            for row in csv_reader:
+                if len(row) < 5:  # Minimum required fields
+                    continue
+
+                video_name = row[0]
+                start_time_str = row[1]
+                end_time_str = row[2]
+                rating = int(row[3])
+                limb = int(row[4])
+
+                # Handle verification flag
+                needs_verification = False
+                if len(row) > 5:
+                    needs_verification = row[5].lower() == 'true'
+
+                if video_name not in ratings_data:
+                    ratings_data[video_name] = []
+
+                ratings_data[video_name].append({
+                    'startTime': timeToSeconds(start_time_str),
+                    'endTime': timeToSeconds(end_time_str),
+                    'startTimeStr': start_time_str,
+                    'endTimeStr': end_time_str,
+                    'rating': rating,
+                    'limb': limb,
+                    'needsVerification': needs_verification
+                })
+
+        return jsonify({
+            'status': 'success',
+            'data': ratings_data,
+            'message': f'Импортировано {len(ratings_data)} видео с оценками'
+        })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Ошибка импорта: {str(e)}'
+        }), 500
+
+
+def timeToSeconds(time_str):
+    """Convert mm:ss to seconds"""
+    parts = time_str.split(':')
+    if len(parts) != 2:
+        return 0
+    try:
+        minutes = int(parts[0])
+        seconds = int(parts[1])
+        return minutes * 60 + seconds
+    except ValueError:
+        return 0
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const ratingValueInput = document.getElementById('rating-value');
     const limbValueSelect = document.getElementById('limb-value');
     const ratingsTableBody = document.getElementById('ratings-table-body');
+    const importButton = document.getElementById('import-btn');
 
     const videoRatings = {};
     Object.assign(videoRatings, initialRatings);
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Обработчик клика по названию видео
     videoItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             if (e.target.classList.contains('delete-rating-btn') ||
                 e.target.tagName === 'BUTTON' ||
                 e.target.tagName === 'INPUT') {
@@ -53,6 +54,8 @@ document.addEventListener('DOMContentLoaded', function () {
             filterVideos(filter);
         });
     });
+
+    importButton.addEventListener('click', importRatingsFromFile);
 
     // Функция для преобразования времени из формата мм:сс в секунды
     function timeToSeconds(timeStr) {
@@ -214,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         addRatingToTable(ratingData, videoRatings[video].length - 1);
 
-        // Сбрасываем чекбокс после добавления
         document.getElementById('verification-checkbox').checked = false;
 
         const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
@@ -244,14 +246,8 @@ document.addEventListener('DOMContentLoaded', function () {
         row.appendChild(limbCell);
 
         const verificationCell = document.createElement('td');
-        const verificationCheckbox = document.createElement('input');
-        verificationCheckbox.type = 'checkbox';
-        verificationCheckbox.checked = ratingData.needsVerification || false;
-        verificationCheckbox.addEventListener('change', function () {
-            videoRatings[video][index].needsVerification = this.checked;
-            saveVideoRatings();
-        });
-        verificationCell.appendChild(verificationCheckbox);
+        verificationCell.textContent = ratingData.needsVerification ? "Да" : "Нет";
+        verificationCell.className = ratingData.needsVerification ? "needs-verification" : "verified";
         row.appendChild(verificationCell);
 
         const actionsCell = document.createElement('td');
@@ -268,7 +264,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         row.scrollIntoView({behavior: 'smooth', block: 'end'});
     }
-
 
     function deleteRating(video, index) {
         if (videoRatings[video] && videoRatings[video][index]) {
@@ -332,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Отправляем на бэкенд
             const response = await fetch('/api/export-ratings', {
                 method: 'POST',
                 headers: {
@@ -351,6 +345,30 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Export error:', error);
             alert('Произошла ошибка при экспорте');
+        }
+    }
+
+    async function importRatingsFromFile() {
+        try {
+            const response = await fetch('/api/import-ratings');
+            const result = await response.json();
+
+            if (response.ok) {
+                const existingRatings = JSON.parse(localStorage.getItem('videoRatings') || '{}');
+                const mergedRatings = {...existingRatings, ...result.data};
+
+                localStorage.setItem('videoRatings', JSON.stringify(mergedRatings));
+
+                loadVideoRatings();
+                filterVideos(document.querySelector('.filter-btn.active').dataset.filter);
+
+                alert(result.message);
+            } else {
+                alert(result.message || 'Ошибка импорта');
+            }
+        } catch (error) {
+            console.error('Import error:', error);
+            alert('Произошла ошибка при импорте');
         }
     }
 

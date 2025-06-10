@@ -12,11 +12,14 @@
             <div class="header-row">
                 <h1 class="header">Видеофрагменты:</h1>
                 <div class="filter-controls">
-                    <button class="filter-btn active" data-filter="all">Все</button>
-                    <button class="filter-btn" data-filter="rated">Оценено</button>
-                    <button class="filter-btn" data-filter="unrated">Не оценено</button>
-                    <button class="filter-btn" data-filter="needs-verification">Нужна верификация</button>
-                    <button id="export-btn" class="export-button">Экспорт в CSV</button>
+                    <div class="filter-controls">
+                        <button class="filter-btn active" data-filter="all">Все</button>
+                        <button class="filter-btn" data-filter="rated">Оценено</button>
+                        <button class="filter-btn" data-filter="unrated">Не оценено</button>
+                        <button class="filter-btn" data-filter="needs-verification">Нужна верификация</button>
+                        <button id="import-btn" class="import-button">Импорт из CSV</button>
+                        <button id="export-btn" class="export-button">Экспорт в CSV</button>
+                    </div>
                 </div>
             </div>
             <ul class="video-list">
