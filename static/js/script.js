@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const limbValueSelect = document.getElementById('limb-value');
     const ratingsTableBody = document.getElementById('ratings-table-body');
     const importButton = document.getElementById('import-btn');
+    const tableHeaders = document.querySelectorAll('#ratings-table th');
+    const timeHeaders = document.querySelectorAll('.ratings-table th:nth-child(1), .ratings-table th:nth-child(2)');
 
     const videoRatings = {};
     Object.assign(videoRatings, initialRatings);
@@ -56,6 +58,67 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     importButton.addEventListener('click', importRatingsFromFile);
+
+    // Обработчики для сортировки таблицы
+    tableHeaders.forEach((header, index) => {
+        header.addEventListener('click', () => {
+            sortTable(index);
+        });
+    });
+
+
+    timeHeaders.forEach(header => {
+        header.addEventListener('mouseenter', () => {
+            timeHeaders.forEach(h => h.style.backgroundColor = '#e6e6e6');
+        });
+
+        header.addEventListener('mouseleave', () => {
+            timeHeaders.forEach(h => h.style.backgroundColor = '#f2f2f2');
+        });
+    });
+
+    // Функция для сортировки таблицы
+    function sortTable(columnIndex) {
+        const video = videoTitle.textContent;
+        if (!video || !videoRatings[video]) return;
+
+        const ratings = videoRatings[video];
+        const tbody = ratingsTableBody;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Направление сортировки
+        const isAscending = !tbody.dataset.sortAsc || tbody.dataset.sortAsc === 'false';
+        tbody.dataset.sortAsc = isAscending;
+        tbody.dataset.sortedBy = columnIndex;
+
+        ratings.sort((a, b) => {
+            let compareResult = 0;
+
+            switch (columnIndex) {
+                case 0: // Начало
+                case 1: // Конец
+                    compareResult = a.startTime - b.startTime;
+                    if (columnIndex === 1) {
+                        compareResult = a.endTime - b.endTime;
+                    }
+                    break;
+                case 2: // Оценка
+                    compareResult = a.rating - b.rating;
+                    break;
+                case 3: // Конечность
+                    compareResult = a.limb - b.limb;
+                    break;
+                case 4: // Верификация
+                    compareResult = (a.needsVerification === b.needsVerification) ? 0 :
+                                     a.needsVerification ? -1 : 1;
+                    break;
+            }
+
+            return isAscending ? compareResult : -compareResult;
+        });
+
+        loadRatingsForVideo(video);
+    }
 
     // Функция для преобразования времени из формата мм:сс в секунды
     function timeToSeconds(timeStr) {
@@ -154,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ratingsTableBody.innerHTML = '';
     }
 
-
     function addRating() {
         const video = videoTitle.textContent;
         if (!video) return;
@@ -165,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const limb = parseInt(limbValueSelect.value);
         const needsVerification = document.getElementById('verification-checkbox').checked;
 
-        // Преобразуем время из мм:сс в секунды
+        // Время из мм:сс в секунды
         const startTime = timeToSeconds(startTimeStr);
         const endTime = timeToSeconds(endTimeStr);
 
@@ -280,6 +342,38 @@ document.addEventListener('DOMContentLoaded', function () {
         ratingsTableBody.innerHTML = '';
 
         if (videoRatings[video]) {
+            // Проверяем, есть ли сохраненная сортировка
+            const sortedBy = ratingsTableBody.dataset.sortedBy;
+            const sortAsc = ratingsTableBody.dataset.sortAsc === 'true';
+
+            if (sortedBy) {
+                videoRatings[video].sort((b, a) => {
+                    let compareResult = 0;
+
+                    switch (parseInt(sortedBy)) {
+                        case 0:
+                        case 1:
+                            compareResult = b.startTime - a.startTime;
+                            if (parseInt(sortedBy) === 1) {
+                                compareResult = b.endTime - a.endTime;
+                            }
+                            break;
+                        case 2:
+                            compareResult = a.rating - b.rating;
+                            break;
+                        case 3:
+                            compareResult = b.limb - a.limb;
+                            break;
+                        case 4:
+                            compareResult = (a.needsVerification === b.needsVerification) ? 0 :
+                                         b.needsVerification ? -1 : 1;
+                            break;
+                    }
+
+                    return sortAsc ? compareResult : -compareResult;
+                });
+            }
+
             videoRatings[video].forEach((rating, index) => {
                 rating.startTimeStr = secondsToTime(rating.startTime);
                 rating.endTimeStr = secondsToTime(rating.endTime);

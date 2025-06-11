@@ -339,6 +339,16 @@ body {
     background-color: #f2f2f2;
     position: sticky;
     top: 0;
+    cursor: pointer;
+}
+
+.ratings-table th:hover {
+    background-color: #e6e6e6;
+}
+
+.ratings-table th.time-header:hover,
+.ratings-table th.time-header.group-hover {
+    background-color: #e6e6e6;
 }
 
 .ratings-table tr:hover {

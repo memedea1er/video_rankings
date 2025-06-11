@@ -4,7 +4,7 @@ import csv
 
 app = Flask(__name__)
 app.config['ALLOWED_EXTENSIONS'] = {'mp4'}
-app.config['VIDEO_FOLDER'] = "C:\\Users\\mf\\Videos\\NVIDIA\\Desktop"
+app.config['VIDEO_FOLDER'] = "/media/axserver/USB DISK/видео"
 app.config['RATINGS_FILE'] = "ratings.csv"
 
 
@@ -102,7 +102,6 @@ def import_ratings():
                     'limb': limb,
                     'needsVerification': needs_verification
                 })
-
         return jsonify({
             'status': 'success',
             'data': ratings_data,
@@ -130,4 +129,4 @@ def timeToSeconds(time_str):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port = 5003)
