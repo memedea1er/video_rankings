@@ -61,11 +61,65 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Обработчики для сортировки таблицы
     tableHeaders.forEach((header, index) => {
+        const arrowSpan = document.createElement('span');
+        arrowSpan.className = 'sort-arrow';
+        header.appendChild(arrowSpan);
+
         header.addEventListener('click', () => {
-            sortTable(index);
+            const isStartTime = index === 0;
+            const isEndTime = index === 1;
+            const isAction = index === 5;
+
+            // Если это один из заголовков времени
+            if (isStartTime || isEndTime) {
+                const pairedIndex = isStartTime ? 1 : 0;
+                const pairedHeader = tableHeaders[pairedIndex];
+
+                const currentClickCount = header.clickCount || 0;
+                const newClickCount = currentClickCount + 1;
+                const isAscending = newClickCount % 2 === 0;
+
+                header.clickCount = newClickCount;
+                pairedHeader.clickCount = newClickCount;
+
+                tableHeaders.forEach((h, idx) => {
+                    const arrow = h.querySelector('.sort-arrow');
+                    if (idx === index || idx === pairedIndex) {
+                        arrow.textContent = isAscending ? ' ↑' : ' ↓';
+                        arrow.style.visibility = 'visible';
+                    } else {
+                        arrow.textContent = '';
+                        arrow.style.visibility = 'hidden';
+                        h.clickCount = 0;
+                    }
+                });
+
+                sortTable(index, isAscending);
+            } else if (isAction) {
+            } else {
+                // Обычная обработка для других заголовков
+                const currentClickCount = header.clickCount || 0;
+                const newClickCount = currentClickCount + 1;
+                const isAscending = newClickCount % 2 === 0;
+
+                header.clickCount = newClickCount;
+
+                tableHeaders.forEach((h, idx) => {
+                    const arrow = h.querySelector('.sort-arrow');
+                    if (idx === index) {
+                        arrow.textContent = isAscending ? ' ↑' : ' ↓';
+                        arrow.style.visibility = 'visible';
+                    } else {
+                        arrow.textContent = '';
+                        arrow.style.visibility = 'hidden';
+                        h.clickCount = 0;
+                    }
+                });
+
+                sortTable(index, isAscending);
+            }
         });
     });
-
 
     timeHeaders.forEach(header => {
         header.addEventListener('mouseenter', () => {
@@ -78,18 +132,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Функция для сортировки таблицы
-    function sortTable(columnIndex) {
+    function sortTable(columnIndex, isAscending) {
         const video = videoTitle.textContent;
         if (!video || !videoRatings[video]) return;
 
         const ratings = videoRatings[video];
-        const tbody = ratingsTableBody;
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-
-        // Направление сортировки
-        const isAscending = !tbody.dataset.sortAsc || tbody.dataset.sortAsc === 'false';
-        tbody.dataset.sortAsc = isAscending;
-        tbody.dataset.sortedBy = columnIndex;
 
         ratings.sort((a, b) => {
             let compareResult = 0;
@@ -97,23 +144,22 @@ document.addEventListener('DOMContentLoaded', function () {
             switch (columnIndex) {
                 case 0: // Начало
                 case 1: // Конец
-                    compareResult = a.startTime - b.startTime;
+                    compareResult = b.startTime - a.startTime;
                     if (columnIndex === 1) {
-                        compareResult = a.endTime - b.endTime;
+                        compareResult = b.endTime - a.endTime;
                     }
                     break;
                 case 2: // Оценка
-                    compareResult = a.rating - b.rating;
+                    compareResult = b.rating - a.rating;
                     break;
                 case 3: // Конечность
-                    compareResult = a.limb - b.limb;
+                    compareResult = b.limb - a.limb;
                     break;
                 case 4: // Верификация
                     compareResult = (a.needsVerification === b.needsVerification) ? 0 :
-                                     a.needsVerification ? -1 : 1;
+                        a.needsVerification ? -1 : 1;
                     break;
             }
-
             return isAscending ? compareResult : -compareResult;
         });
 
@@ -342,38 +388,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ratingsTableBody.innerHTML = '';
 
         if (videoRatings[video]) {
-            // Проверяем, есть ли сохраненная сортировка
-            const sortedBy = ratingsTableBody.dataset.sortedBy;
-            const sortAsc = ratingsTableBody.dataset.sortAsc === 'true';
-
-            if (sortedBy) {
-                videoRatings[video].sort((b, a) => {
-                    let compareResult = 0;
-
-                    switch (parseInt(sortedBy)) {
-                        case 0:
-                        case 1:
-                            compareResult = b.startTime - a.startTime;
-                            if (parseInt(sortedBy) === 1) {
-                                compareResult = b.endTime - a.endTime;
-                            }
-                            break;
-                        case 2:
-                            compareResult = a.rating - b.rating;
-                            break;
-                        case 3:
-                            compareResult = b.limb - a.limb;
-                            break;
-                        case 4:
-                            compareResult = (a.needsVerification === b.needsVerification) ? 0 :
-                                         b.needsVerification ? -1 : 1;
-                            break;
-                    }
-
-                    return sortAsc ? compareResult : -compareResult;
-                });
-            }
-
             videoRatings[video].forEach((rating, index) => {
                 rating.startTimeStr = secondsToTime(rating.startTime);
                 rating.endTimeStr = secondsToTime(rating.endTime);

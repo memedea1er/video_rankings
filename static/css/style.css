@@ -351,6 +351,15 @@ body {
     background-color: #e6e6e6;
 }
 
+.sort-arrow {
+    margin-left: 5px;
+    visibility: hidden;
+}
+
+.ratings-table th:nth-child(1) .sort-arrow {
+    opacity: 0;
+}
+
 .ratings-table tr:hover {
     background-color: #f5f5f5;
 }
@@ -373,3 +382,7 @@ body {
     background: #c82333;
 }
 
+.sort-arrow {
+    margin-left: 5px;
+    visibility: hidden;
+}
