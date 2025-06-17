@@ -1,0 +1,49 @@
+.video-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.video-item {
+    background: #f8f9fa;
+    margin-bottom: 8px;
+    padding: 12px 15px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.video-item:hover {
+    background: #e9ecef;
+}
+
+.video-item {
+    cursor: pointer;
+}
+
+.video-title {
+    padding-right: 10px;
+    flex-grow: 1;
+}
+
+.rating-status.rated {
+    color: #28a745;
+}
+
+.verification-part {
+    color: #ff9d1d;
+    margin-left: 5px;
+}
+
+.no-videos {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.rating-status {
+    font-weight: bold;
+    color: #555;
+}

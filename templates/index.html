@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Rating Tool</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/video-list.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/video-player.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/ratings-table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/rating-controls.css') }}">
 </head>
 <body>
     <div class="main-container">
@@ -101,9 +106,15 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/videoPlayerModule.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/videoListModule.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ratingTableModule.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ratingFormModule.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/videoRatingsModule.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/importExportModule.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script>
-    const initialRatings = {{ initialRatings|tojson|safe }};
-    </script>
 </body>
 </html>

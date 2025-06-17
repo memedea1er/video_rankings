@@ -1,0 +1,62 @@
+.ratings-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ratings-table th, .ratings-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.ratings-table th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    cursor: pointer;
+}
+
+.ratings-table th:hover {
+    background-color: #e6e6e6;
+}
+
+.ratings-table th.time-header:hover,
+.ratings-table th.time-header.group-hover {
+    background-color: #e6e6e6;
+}
+
+.sort-arrow {
+    margin-left: 5px;
+    visibility: hidden;
+}
+
+.ratings-table th:nth-child(1) .sort-arrow {
+    opacity: 0;
+}
+
+.ratings-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.ratings-table .needs-verification {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.delete-rating-btn {
+    padding: 4px 8px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.delete-rating-btn:hover {
+    background: #c82333;
+}
+
+.sort-arrow {
+    margin-left: 5px;
+    visibility: hidden;
+}
