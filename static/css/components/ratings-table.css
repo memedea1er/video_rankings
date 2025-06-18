@@ -43,6 +43,23 @@
     font-weight: bold;
 }
 
+button {
+    margin-right: 2px;
+}
+
+.edit-rating-btn {
+    padding: 4px 8px;
+    background: #4361ee;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.edit-rating-btn:hover {
+    background: #3651c7;
+}
+
 .delete-rating-btn {
     padding: 4px 8px;
     background: #dc3545;
@@ -56,7 +73,49 @@
     background: #c82333;
 }
 
-.sort-arrow {
-    margin-left: 5px;
-    visibility: hidden;
+#ratings-table-body tr.editing td {
+    padding-top: 5px;
+    padding-bottom: 6px;
+}
+
+#ratings-table-body tr.editing td:nth-child(1),
+#ratings-table-body tr.editing td:nth-child(2){
+    padding-left: 3px;
+}
+
+#ratings-table-body tr.editing td:nth-child(3),
+#ratings-table-body tr.editing td:nth-child(4){
+    padding-left: 0;
+}
+
+#ratings-table-body input[type="text"] {
+    height: 16px;
+    width: 35px;
+    padding: 6px;
+    border: var(--border);
+    border-radius: 3px;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+#ratings-table-body input[type="number"] {
+    height: 16px;
+    width: 20px;
+    padding: 6px;
+    border: var(--border);
+    border-radius: 3px;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+#ratings-table-body input[type="number"]::-webkit-outer-spin-button,
+#ratings-table-body input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#ratings-table-body input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }

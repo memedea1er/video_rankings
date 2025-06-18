@@ -43,8 +43,21 @@ const videoRatingsModule = (function () {
         }
     }
 
+    function updateRating(video, index, ratingData) {
+        if (videoRatings[video] && videoRatings[video][index]) {
+            videoRatings[video][index] = ratingData;
+            saveVideoRatings();
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            videoListModule.filterVideos(activeFilter);
+        }
+    }
+
     function getRatings(video) {
         return videoRatings[video] || [];
+    }
+
+    function getRating(video, index) {
+        return videoRatings[video][index];
     }
 
     function getRatingCount(video) {
@@ -111,7 +124,9 @@ const videoRatingsModule = (function () {
         loadVideoRatings,
         addRating,
         deleteRating,
+        updateRating,
         getRatings,
+        getRating,
         getRatingCount,
         getVerificationCount,
         hasRatings,
