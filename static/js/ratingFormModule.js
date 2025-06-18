@@ -16,36 +16,6 @@ const ratingFormModule = (function() {
         const startTime = utils.timeToSeconds(startTimeStr);
         const endTime = utils.timeToSeconds(endTimeStr);
 
-        if (isNaN(startTime) || isNaN(endTime)) {
-            alert('Пожалуйста, введите корректное время в формате мм:сс');
-            return;
-        }
-
-        if (isNaN(rating) || isNaN(limb)) {
-            alert('Пожалуйста, введите корректные значения');
-            return;
-        }
-
-        if (endTime <= startTime) {
-            alert('Конечное время должно быть больше начального');
-            return;
-        }
-
-        if (startTime > 300 || endTime > 300) {
-            alert('Время должно быть меньше или равно 5:00');
-            return;
-        }
-
-        if (rating < 1 || rating > 5) {
-            alert('Оценка должна быть от 1 до 5');
-            return;
-        }
-
-        if (limb < 0 || limb > 4) {
-            alert('Конечность должна быть от 0 до 4');
-            return;
-        }
-
         const ratingData = {
             startTime,
             endTime,
@@ -55,6 +25,10 @@ const ratingFormModule = (function() {
             limb,
             needsVerification
         };
+
+        if (!utils.dataValidation(ratingData)) {
+            return;
+        }
 
         videoRatingsModule.addRating(video, ratingData);
         ratingTableModule.loadRatingsForVideo(video);

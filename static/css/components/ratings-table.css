@@ -74,9 +74,10 @@ button {
 }
 
 #ratings-table-body tr.editing td {
-    padding-top: 5px;
-    padding-bottom: 6px;
+    padding-top: 6px;
+    padding-bottom: 5px;
 }
+
 
 #ratings-table-body tr.editing td:nth-child(1),
 #ratings-table-body tr.editing td:nth-child(2){
@@ -119,3 +120,5 @@ button {
     height: 16px;
     cursor: pointer;
 }
+
+.white-cross { filter: brightness(1000%); }

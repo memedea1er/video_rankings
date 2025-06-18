@@ -24,6 +24,10 @@ const ratingTableModule = (function () {
                     handleTimeSort(index, isStartTime ? 1 : 0);
                 } else if (!isAction) {
                     handleRegularSort(index);
+                } else {
+                    const video = videoPlayerModule.getCurrentVideo();
+                    updateSortArrows(6, null, true);
+                    loadRatingsForVideo(video);
                 }
             });
         });
@@ -53,7 +57,6 @@ const ratingTableModule = (function () {
 
         updateSortArrows(index, pairedIndex, isAscending);
         sortTable(index, isAscending);
-        scrollTableToBottom();
     }
 
     function handleRegularSort(index) {
@@ -66,7 +69,6 @@ const ratingTableModule = (function () {
 
         updateSortArrows(index, null, isAscending);
         sortTable(index, isAscending);
-        scrollTableToBottom();
     }
 
     function updateSortArrows(index, pairedIndex, isAscending) {
@@ -168,7 +170,6 @@ const ratingTableModule = (function () {
 
         if (isEditing) {
             saveChanges(row, index, video);
-            row.classList.remove('editing');
         } else {
             enterEditMode(row);
             row.classList.add('editing');
@@ -185,8 +186,7 @@ const ratingTableModule = (function () {
             if (i === 0 || i === 1) {
                 input.type = 'text';
                 input.value = originalContent;
-            }
-            else if (i === 2 || i === 3) {
+            } else if (i === 2 || i === 3) {
                 input.type = 'number';
                 input.value = originalContent;
             } else {
@@ -203,10 +203,7 @@ const ratingTableModule = (function () {
         }
         const deleteBtn = row.querySelector('.delete-rating-btn');
         if (deleteBtn) {
-            deleteBtn.innerHTML = `
-                <svg width="18" height="14" viewBox="-2 -4 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 1L1 12M1 1L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>`
+            deleteBtn.innerHTML = '<span class="white-cross">❌</span>';
         }
     }
 
@@ -219,13 +216,35 @@ const ratingTableModule = (function () {
             const input = cell.querySelector('input');
             value = input.value;
 
-            switch(i) {
-                case 0: updatedData.startTime = utils.timeToSeconds(value); updatedData.startTimeStr = value; break;
-                case 1: updatedData.endTime = utils.timeToSeconds(value); updatedData.endTimeStr = value; break;
-                case 2: updatedData.rating = value; break;
-                case 3: updatedData.limb = value; break;
-                case 4: updatedData.needsVerification = input.checked; break;
+            switch (i) {
+                case 0:
+                    updatedData.startTime = utils.timeToSeconds(value);
+                    updatedData.startTimeStr = value;
+                    break;
+                case 1:
+                    updatedData.endTime = utils.timeToSeconds(value);
+                    updatedData.endTimeStr = value;
+                    break;
+                case 2:
+                    updatedData.rating = value;
+                    break;
+                case 3:
+                    updatedData.limb = value;
+                    break;
+                case 4:
+                    updatedData.needsVerification = input.checked;
+                    break;
             }
+        });
+
+        if (!utils.dataValidation(updatedData)) {
+            return;
+        }
+
+        cells.forEach((cell, i) => {
+            let value;
+            const input = cell.querySelector('input');
+            value = input.value;
 
             cell.textContent = i === 4 ? (input.checked ? 'Да' : 'Нет') : value;
             if (i === 4) {
@@ -243,37 +262,35 @@ const ratingTableModule = (function () {
         if (deleteBtn) {
             deleteBtn.innerHTML = '🗑️';
         }
+
+        row.classList.remove('editing');
     }
 
     function cancelEdit(row, index, video) {
-    if (!row.classList.contains('editing')) return;
+        if (!row.classList.contains('editing')) return;
 
-    const originalRating = videoRatingsModule.getRating(video, index);
+        const originalRating = videoRatingsModule.getRating(video, index);
 
-    const cells = row.querySelectorAll('td:not(:last-child)');
+        const cells = row.querySelectorAll('td:not(:last-child)');
 
-    cells[0].textContent = originalRating.startTimeStr;
+        cells[0].textContent = originalRating.startTimeStr;
+        cells[1].textContent = originalRating.endTimeStr;
+        cells[2].textContent = originalRating.rating;
+        cells[3].textContent = originalRating.limb;
+        cells[4].textContent = originalRating.needsVerification ? "Да" : "Нет";
+        cells[4].className = originalRating.needsVerification ? "needs-verification" : "verified";
 
-    cells[1].textContent = originalRating.endTimeStr;
+        const editBtn = row.querySelector('.edit-rating-btn');
+        if (editBtn) {
+            editBtn.innerHTML = '✏️';
+        }
+        const deleteBtn = row.querySelector('.delete-rating-btn');
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '🗑️';
+        }
 
-    cells[2].textContent = originalRating.rating;
-
-    cells[3].textContent = originalRating.limb;
-
-    cells[4].textContent = originalRating.needsVerification ? "Да" : "Нет";
-    cells[4].className = originalRating.needsVerification ? "needs-verification" : "verified";
-
-    const editBtn = row.querySelector('.edit-rating-btn');
-    if (editBtn) {
-        editBtn.innerHTML = '✏️';
+        row.classList.remove('editing');
     }
-    const deleteBtn = row.querySelector('.delete-rating-btn');
-    if (deleteBtn) {
-        deleteBtn.innerHTML = '🗑️';
-    }
-
-    row.classList.remove('editing');
-}
 
     function clearTable() {
         ratingsTableBody.innerHTML = '';
