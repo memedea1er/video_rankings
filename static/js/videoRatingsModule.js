@@ -84,10 +84,7 @@ const videoRatingsModule = (function () {
             switch (columnIndex) {
                 case 0: // Начало
                 case 1: // Конец
-                    compareResult = b.startTime - a.startTime;
-                    if (columnIndex === 1) {
-                        compareResult = b.endTime - a.endTime;
-                    }
+                    compareResult = b.startTime + b.endTime - a.startTime - a.endTime;
                     break;
                 case 2: // Оценка
                     compareResult = b.rating - a.rating;

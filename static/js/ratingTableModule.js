@@ -3,6 +3,8 @@ const ratingTableModule = (function () {
     const tableHeaders = document.querySelectorAll('#ratings-table th');
     const timeHeaders = document.querySelectorAll('.ratings-table th:nth-child(1), .ratings-table th:nth-child(2)');
     const ratingsTable = document.getElementById('ratings-table');
+    let currentSortColumn = null;
+    let isCurrentSortAscending = null;
 
     function init() {
         setupSortingHeaders();
@@ -26,8 +28,7 @@ const ratingTableModule = (function () {
                     handleRegularSort(index);
                 } else {
                     const video = videoPlayerModule.getCurrentVideo();
-                    updateSortArrows(6, null, true);
-                    loadRatingsForVideo(video);
+                    loadUnsortedRatings(video);
                 }
             });
         });
@@ -46,29 +47,38 @@ const ratingTableModule = (function () {
     }
 
     function handleTimeSort(index, pairedIndex) {
+        const video = videoPlayerModule.getCurrentVideo();
         const header = tableHeaders[index];
         const pairedHeader = tableHeaders[pairedIndex];
         const currentClickCount = header.clickCount || 0;
         const newClickCount = currentClickCount + 1;
         const isAscending = newClickCount % 2 === 0;
 
+        currentSortColumn = index;
+        isCurrentSortAscending = isAscending;
+
         header.clickCount = newClickCount;
         pairedHeader.clickCount = newClickCount;
 
         updateSortArrows(index, pairedIndex, isAscending);
-        sortTable(index, isAscending);
+        loadRatingsForVideo(video);
     }
 
     function handleRegularSort(index) {
+        const video = videoPlayerModule.getCurrentVideo();
         const header = tableHeaders[index];
         const currentClickCount = header.clickCount || 0;
         const newClickCount = currentClickCount + 1;
         const isAscending = newClickCount % 2 === 0;
 
+        currentSortColumn = index;
+        isCurrentSortAscending = isAscending;
+
         header.clickCount = newClickCount;
 
         updateSortArrows(index, null, isAscending);
-        sortTable(index, isAscending);
+
+        loadRatingsForVideo(video);
     }
 
     function updateSortArrows(index, pairedIndex, isAscending) {
@@ -85,19 +95,16 @@ const ratingTableModule = (function () {
         });
     }
 
-    function sortTable(columnIndex, isAscending) {
-        const video = videoPlayerModule.getCurrentVideo();
-        if (!video || !videoRatingsModule.hasRatings(video)) return;
-
-        const ratings = videoRatingsModule.getSortedRatings(video, columnIndex, isAscending);
-        loadRatingsForVideo(video, ratings);
-    }
-
-    function loadRatingsForVideo(video, ratings = null) {
+    function loadRatingsForVideo(video) {
         clearTable();
 
-        if (!ratings) {
+        let ratings;
+
+        if (currentSortColumn === null && isCurrentSortAscending === null) {
             ratings = videoRatingsModule.getRatings(video);
+        }
+        else {
+            ratings = videoRatingsModule.getSortedRatings(video, currentSortColumn, isCurrentSortAscending);
         }
 
         ratings.forEach((rating, index) => {
@@ -152,7 +159,6 @@ const ratingTableModule = (function () {
         row.appendChild(actionsCell);
 
         ratingsTableBody.appendChild(row);
-        scrollTableToBottom();
     }
 
     function deleteCancelToggle(row, index, video) {
@@ -211,31 +217,13 @@ const ratingTableModule = (function () {
         const cells = row.querySelectorAll('td:not(:last-child)');
         const updatedData = {};
 
-        cells.forEach((cell, i) => {
-            let value;
-            const input = cell.querySelector('input');
-            value = input.value;
-
-            switch (i) {
-                case 0:
-                    updatedData.startTime = utils.timeToSeconds(value);
-                    updatedData.startTimeStr = value;
-                    break;
-                case 1:
-                    updatedData.endTime = utils.timeToSeconds(value);
-                    updatedData.endTimeStr = value;
-                    break;
-                case 2:
-                    updatedData.rating = value;
-                    break;
-                case 3:
-                    updatedData.limb = value;
-                    break;
-                case 4:
-                    updatedData.needsVerification = input.checked;
-                    break;
-            }
-        });
+        updatedData.startTime = utils.timeToSeconds(cells[0].querySelector('input').value);
+        updatedData.startTimeStr = cells[0].querySelector('input').value;
+        updatedData.endTime = utils.timeToSeconds(cells[1].querySelector('input').value);
+        updatedData.endTimeStr = cells[1].querySelector('input').value;
+        updatedData.rating = cells[2].querySelector('input').value;
+        updatedData.limb = cells[3].querySelector('input').value;
+        updatedData.needsVerification = cells[4].querySelector('input').checked;
 
         if (!utils.dataValidation(updatedData)) {
             return;
@@ -262,6 +250,8 @@ const ratingTableModule = (function () {
         if (deleteBtn) {
             deleteBtn.innerHTML = '🗑️';
         }
+
+        loadRatingsForVideo(video);
 
         row.classList.remove('editing');
     }
@@ -296,6 +286,13 @@ const ratingTableModule = (function () {
         ratingsTableBody.innerHTML = '';
     }
 
+    function loadUnsortedRatings(video) {
+        currentSortColumn = null;
+        isCurrentSortAscending = null;
+        updateSortArrows(6, null, true);
+        loadRatingsForVideo(video);
+    }
+
     function scrollTableToBottom() {
         if (ratingsTable) {
             const lastRow = ratingsTableBody.lastElementChild;
@@ -311,6 +308,8 @@ const ratingTableModule = (function () {
     return {
         init,
         loadRatingsForVideo,
+        loadUnsortedRatings,
         clearTable,
+        scrollTableToBottom
     };
 })();

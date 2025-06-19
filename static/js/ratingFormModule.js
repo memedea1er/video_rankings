@@ -1,4 +1,4 @@
-const ratingFormModule = (function() {
+const ratingFormModule = (function () {
     function init(addRatingBtn) {
         addRatingBtn.addEventListener('click', addRating);
     }
@@ -32,6 +32,7 @@ const ratingFormModule = (function() {
 
         videoRatingsModule.addRating(video, ratingData);
         ratingTableModule.loadRatingsForVideo(video);
+        ratingTableModule.scrollTableToBottom();
         videoListModule.updateVideoStatus(video);
     }
 

@@ -27,7 +27,8 @@ const videoPlayerModule = (function() {
         player.load();
         player.play();
 
-        ratingTableModule.loadRatingsForVideo(filename);
+        ratingTableModule.loadUnsortedRatings(filename);
+        ratingTableModule.scrollTableToBottom();
     }
 
     function closeVideo() {
