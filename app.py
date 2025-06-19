@@ -99,8 +99,8 @@ def import_ratings():
 
                 ratings_data[video_name].append({
                     'id': rating_id,  # Сохраняем ID
-                    'startTime': timeToSeconds(start_time_str),
-                    'endTime': timeToSeconds(end_time_str),
+                    'startTime': time_to_seconds(start_time_str),
+                    'endTime': time_to_seconds(end_time_str),
                     'startTimeStr': start_time_str,
                     'endTimeStr': end_time_str,
                     'rating': rating,
@@ -121,7 +121,7 @@ def import_ratings():
         }), 500
 
 
-def timeToSeconds(time_str):
+def time_to_seconds(time_str):
     """Convert mm:ss to seconds"""
     parts = time_str.split(':')
     if len(parts) != 2:

@@ -3,9 +3,9 @@ const ratingTableModule = (function () {
     const tableHeaders = document.querySelectorAll('#ratings-table th');
     const timeHeaders = document.querySelectorAll('.ratings-table th:nth-child(1), .ratings-table th:nth-child(2)');
     const ratingsTable = document.getElementById('ratings-table');
+    let currentVideo = null;
     let currentSortColumn = null;
     let isCurrentSortAscending = null;
-    let currentVideo = null; // Добавим для хранения текущего видео
 
     function init() {
         setupSortingHeaders();
@@ -96,7 +96,7 @@ const ratingTableModule = (function () {
     }
 
     function loadRatingsForVideo(video) {
-        currentVideo = video; // Сохраняем текущее видео
+        currentVideo = video;
         clearTable();
 
         let ratings = currentSortColumn === null || isCurrentSortAscending === null
@@ -110,7 +110,7 @@ const ratingTableModule = (function () {
 
     function addRatingToTable(ratingData) {
         const row = document.createElement('tr');
-        row.dataset.ratingId = ratingData.id; // Сохраняем ID в атрибуте строки
+        row.dataset.ratingId = ratingData.id;
 
         const startCell = document.createElement('td');
         startCell.textContent = ratingData.startTimeStr;
@@ -166,7 +166,6 @@ const ratingTableModule = (function () {
             saveChanges(row);
         } else {
             enterEditMode(row);
-            row.classList.add('editing');
         }
     }
 
@@ -193,6 +192,8 @@ const ratingTableModule = (function () {
 
         row.querySelector('.edit-rating-btn').innerHTML = '💾';
         row.querySelector('.delete-rating-btn').innerHTML = '<span class="white-cross">❌</span>';
+
+        row.classList.add('editing');
     }
 
     function saveChanges(row) {

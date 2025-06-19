@@ -73,20 +73,18 @@ button {
     background: #c82333;
 }
 
-#ratings-table-body tr.editing td {
-    padding-top: 6px;
-    padding-bottom: 5px;
-}
-
-
 #ratings-table-body tr.editing td:nth-child(1),
 #ratings-table-body tr.editing td:nth-child(2){
     padding-left: 3px;
+    padding-top: 5px;
+    padding-bottom: 6px;
 }
 
 #ratings-table-body tr.editing td:nth-child(3),
 #ratings-table-body tr.editing td:nth-child(4){
     padding-left: 0;
+    padding-top: 5px;
+    padding-bottom: 6px;
 }
 
 #ratings-table-body input[type="text"] {
