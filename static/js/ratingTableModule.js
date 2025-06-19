@@ -5,6 +5,7 @@ const ratingTableModule = (function () {
     const ratingsTable = document.getElementById('ratings-table');
     let currentSortColumn = null;
     let isCurrentSortAscending = null;
+    let currentVideo = null; // Добавим для хранения текущего видео
 
     function init() {
         setupSortingHeaders();
@@ -27,8 +28,7 @@ const ratingTableModule = (function () {
                 } else if (!isAction) {
                     handleRegularSort(index);
                 } else {
-                    const video = videoPlayerModule.getCurrentVideo();
-                    loadUnsortedRatings(video);
+                    loadUnsortedRatings(currentVideo);
                 }
             });
         });
@@ -96,27 +96,21 @@ const ratingTableModule = (function () {
     }
 
     function loadRatingsForVideo(video) {
+        currentVideo = video; // Сохраняем текущее видео
         clearTable();
 
-        let ratings;
+        let ratings = currentSortColumn === null || isCurrentSortAscending === null
+            ? videoRatingsModule.getRatings(video)
+            : videoRatingsModule.getSortedRatings(video, currentSortColumn, isCurrentSortAscending);
 
-        if (currentSortColumn === null && isCurrentSortAscending === null) {
-            ratings = videoRatingsModule.getRatings(video);
-        }
-        else {
-            ratings = videoRatingsModule.getSortedRatings(video, currentSortColumn, isCurrentSortAscending);
-        }
-
-        ratings.forEach((rating, index) => {
-            addRatingToTable(rating, index);
+        ratings.forEach(rating => {
+            addRatingToTable(rating);
         });
     }
 
-    function addRatingToTable(ratingData, index) {
-        const video = videoPlayerModule.getCurrentVideo();
-        if (!video) return;
-
+    function addRatingToTable(ratingData) {
         const row = document.createElement('tr');
+        row.dataset.ratingId = ratingData.id; // Сохраняем ID в атрибуте строки
 
         const startCell = document.createElement('td');
         startCell.textContent = ratingData.startTimeStr;
@@ -140,42 +134,36 @@ const ratingTableModule = (function () {
         row.appendChild(verificationCell);
 
         const actionsCell = document.createElement('td');
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '🗑️';
-        deleteBtn.className = 'delete-rating-btn';
-        deleteBtn.addEventListener('click', function () {
-            deleteCancelToggle(row, index, video);
-        });
 
         const editBtn = document.createElement('button');
         editBtn.innerHTML = '✏️';
         editBtn.className = 'edit-rating-btn';
-        editBtn.addEventListener('click', function () {
-            toggleEditMode(row, index, video);
-        });
-
+        editBtn.addEventListener('click', () => toggleEditMode(row));
         actionsCell.appendChild(editBtn);
-        actionsCell.appendChild(deleteBtn);
-        row.appendChild(actionsCell);
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.className = 'delete-rating-btn';
+        deleteBtn.addEventListener('click', () => deleteRating(row));
+        actionsCell.appendChild(deleteBtn);
+
+        row.appendChild(actionsCell);
         ratingsTableBody.appendChild(row);
     }
 
-    function deleteCancelToggle(row, index, video) {
+    function deleteRating(row) {
+        const ratingId = row.dataset.ratingId;
         if (row.classList.contains('editing')) {
-            cancelEdit(row, index, video);
-            row.classList.remove('editing');
+            cancelEdit(row);
         } else {
-            videoRatingsModule.deleteRating(video, index);
-            loadRatingsForVideo(video);
+            videoRatingsModule.deleteRating(currentVideo, ratingId);
+            loadRatingsForVideo(currentVideo);
         }
     }
 
-    function toggleEditMode(row, index, video) {
-        const isEditing = row.classList.contains('editing');
-
-        if (isEditing) {
-            saveChanges(row, index, video);
+    function toggleEditMode(row) {
+        if (row.classList.contains('editing')) {
+            saveChanges(row);
         } else {
             enterEditMode(row);
             row.classList.add('editing');
@@ -186,34 +174,29 @@ const ratingTableModule = (function () {
         const cells = row.querySelectorAll('td:not(:last-child)');
 
         cells.forEach((cell, i) => {
-            const originalContent = cell.textContent;
             const input = document.createElement('input');
 
             if (i === 0 || i === 1) {
                 input.type = 'text';
-                input.value = originalContent;
+                input.value = cell.textContent;
             } else if (i === 2 || i === 3) {
                 input.type = 'number';
-                input.value = originalContent;
+                input.value = cell.textContent;
             } else {
                 input.type = 'checkbox';
-                originalContent === "Да" ? input.checked = true : input.checked = false;
+                input.checked = cell.textContent === "Да";
             }
+
             cell.textContent = '';
             cell.appendChild(input);
         });
 
-        const editBtn = row.querySelector('.edit-rating-btn');
-        if (editBtn) {
-            editBtn.innerHTML = '💾';
-        }
-        const deleteBtn = row.querySelector('.delete-rating-btn');
-        if (deleteBtn) {
-            deleteBtn.innerHTML = '<span class="white-cross">❌</span>';
-        }
+        row.querySelector('.edit-rating-btn').innerHTML = '💾';
+        row.querySelector('.delete-rating-btn').innerHTML = '<span class="white-cross">❌</span>';
     }
 
-    function saveChanges(row, index, video) {
+    function saveChanges(row) {
+        const ratingId = row.dataset.ratingId;
         const cells = row.querySelectorAll('td:not(:last-child)');
         const updatedData = {};
 
@@ -221,63 +204,32 @@ const ratingTableModule = (function () {
         updatedData.startTimeStr = cells[0].querySelector('input').value;
         updatedData.endTime = utils.timeToSeconds(cells[1].querySelector('input').value);
         updatedData.endTimeStr = cells[1].querySelector('input').value;
-        updatedData.rating = cells[2].querySelector('input').value;
-        updatedData.limb = cells[3].querySelector('input').value;
+        updatedData.rating = parseInt(cells[2].querySelector('input').value);
+        updatedData.limb = parseInt(cells[3].querySelector('input').value);
         updatedData.needsVerification = cells[4].querySelector('input').checked;
 
-        if (!utils.dataValidation(updatedData)) {
-            return;
-        }
+        if (!utils.dataValidation(updatedData)) return;
 
-        cells.forEach((cell, i) => {
-            let value;
-            const input = cell.querySelector('input');
-            value = input.value;
-
-            cell.textContent = i === 4 ? (input.checked ? 'Да' : 'Нет') : value;
-            if (i === 4) {
-                cell.className = input.checked ? "needs-verification" : "verified";
-            }
-        });
-
-        videoRatingsModule.updateRating(video, index, updatedData);
-
-        const editBtn = row.querySelector('.edit-rating-btn');
-        if (editBtn) {
-            editBtn.innerHTML = '✏️';
-        }
-        const deleteBtn = row.querySelector('.delete-rating-btn');
-        if (deleteBtn) {
-            deleteBtn.innerHTML = '🗑️';
-        }
-
-        loadRatingsForVideo(video);
+        videoRatingsModule.updateRating(currentVideo, ratingId, updatedData);
+        loadRatingsForVideo(currentVideo);
 
         row.classList.remove('editing');
     }
 
-    function cancelEdit(row, index, video) {
-        if (!row.classList.contains('editing')) return;
-
-        const originalRating = videoRatingsModule.getRating(video, index);
-
+    function cancelEdit(row) {
+        const ratingId = row.dataset.ratingId;
+        const rating = videoRatingsModule.getRating(currentVideo, ratingId);
         const cells = row.querySelectorAll('td:not(:last-child)');
 
-        cells[0].textContent = originalRating.startTimeStr;
-        cells[1].textContent = originalRating.endTimeStr;
-        cells[2].textContent = originalRating.rating;
-        cells[3].textContent = originalRating.limb;
-        cells[4].textContent = originalRating.needsVerification ? "Да" : "Нет";
-        cells[4].className = originalRating.needsVerification ? "needs-verification" : "verified";
+        cells[0].textContent = rating.startTimeStr;
+        cells[1].textContent = rating.endTimeStr;
+        cells[2].textContent = rating.rating;
+        cells[3].textContent = rating.limb;
+        cells[4].textContent = rating.needsVerification ? "Да" : "Нет";
+        cells[4].className = rating.needsVerification ? "needs-verification" : "verified";
 
-        const editBtn = row.querySelector('.edit-rating-btn');
-        if (editBtn) {
-            editBtn.innerHTML = '✏️';
-        }
-        const deleteBtn = row.querySelector('.delete-rating-btn');
-        if (deleteBtn) {
-            deleteBtn.innerHTML = '🗑️';
-        }
+        row.querySelector('.edit-rating-btn').innerHTML = '✏️';
+        row.querySelector('.delete-rating-btn').innerHTML = '🗑️';
 
         row.classList.remove('editing');
     }

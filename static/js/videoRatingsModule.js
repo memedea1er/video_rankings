@@ -28,27 +28,35 @@ const videoRatingsModule = (function () {
         if (!videoRatings[video]) {
             videoRatings[video] = [];
         }
+        ratingData.id = Date.now().toString();
         videoRatings[video].push(ratingData);
         saveVideoRatings();
         const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
         videoListModule.filterVideos(activeFilter);
     }
 
-    function deleteRating(video, index) {
-        if (videoRatings[video] && videoRatings[video][index]) {
-            videoRatings[video].splice(index, 1);
-            saveVideoRatings();
-            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-            videoListModule.filterVideos(activeFilter);
+    function deleteRating(video, id) {
+        if (videoRatings[video]) {
+            const index = videoRatings[video].findIndex(r => r.id === id);
+            if (index !== -1) {
+                videoRatings[video].splice(index, 1);
+                saveVideoRatings();
+                const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                videoListModule.filterVideos(activeFilter);
+            }
         }
     }
 
-    function updateRating(video, index, ratingData) {
-        if (videoRatings[video] && videoRatings[video][index]) {
-            videoRatings[video][index] = ratingData;
-            saveVideoRatings();
-            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-            videoListModule.filterVideos(activeFilter);
+    function updateRating(video, id, ratingData) {
+        if (videoRatings[video]) {
+            const index = videoRatings[video].findIndex(r => r.id === id);
+            if (index !== -1) {
+                ratingData.id = id;
+                videoRatings[video][index] = ratingData;
+                saveVideoRatings();
+                const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                videoListModule.filterVideos(activeFilter);
+            }
         }
     }
 
@@ -56,8 +64,11 @@ const videoRatingsModule = (function () {
         return videoRatings[video] || [];
     }
 
-    function getRating(video, index) {
-        return videoRatings[video][index];
+    function getRating(video, id) {
+        if (videoRatings[video]) {
+            return videoRatings[video].find(r => r.id === id);
+        }
+        return null;
     }
 
     function getRatingCount(video) {
@@ -112,7 +123,13 @@ const videoRatingsModule = (function () {
             if (!videoRatings[video]) {
                 videoRatings[video] = [];
             }
-            videoRatings[video] = [...newRatings[video]];
+
+            // Объединяем оценки, сохраняя уникальность ID
+            newRatings[video].forEach(newRating => {
+                if (!videoRatings[video].some(r => r.id === newRating.id)) {
+                    videoRatings[video].push(newRating);
+                }
+            });
         }
         saveVideoRatings();
     }

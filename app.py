@@ -42,11 +42,13 @@ def export_ratings():
 
         with open(export_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
+            writer.writerow(['video', 'id', 'startTime', 'endTime', 'rating', 'limb', 'needsVerification'])
 
             for video, ratings in ratings_data.items():
                 for rating in ratings:
                     writer.writerow([
                         video,
+                        rating.get('id', ''),
                         rating['startTimeStr'],
                         rating['endTimeStr'],
                         rating['rating'],
@@ -78,22 +80,25 @@ def import_ratings():
 
         with open(ratings_file, 'r', encoding='utf-8') as f:
             csv_reader = csv.reader(f)
+            next(csv_reader)  # Пропускаем заголовок
 
             for row in csv_reader:
-                if len(row) < 5:
+                if len(row) < 6:
                     continue
 
                 video_name = row[0]
-                start_time_str = row[1]
-                end_time_str = row[2]
-                rating = int(row[3])
-                limb = int(row[4])
-                needs_verification = row[5] == 'True'
+                rating_id = row[1]
+                start_time_str = row[2]
+                end_time_str = row[3]
+                rating = int(row[4])
+                limb = int(row[5])
+                needs_verification = row[6] == 'True' if len(row) > 6 else False
 
                 if video_name not in ratings_data:
                     ratings_data[video_name] = []
 
                 ratings_data[video_name].append({
+                    'id': rating_id,  # Сохраняем ID
                     'startTime': timeToSeconds(start_time_str),
                     'endTime': timeToSeconds(end_time_str),
                     'startTimeStr': start_time_str,
@@ -102,6 +107,7 @@ def import_ratings():
                     'limb': limb,
                     'needsVerification': needs_verification
                 })
+
         return jsonify({
             'status': 'success',
             'data': ratings_data,

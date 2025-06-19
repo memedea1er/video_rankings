@@ -18,8 +18,15 @@ const utils = {
     },
 
     dataValidation: function (ratingData) {
+        const timeFormatRegex = /^(\d{1,2}):([0-5]\d)$/;
+
         if (isNaN(ratingData.startTime) || isNaN(ratingData.endTime)) {
             alert('Пожалуйста, введите корректное время в формате мм:сс');
+            return false;
+        }
+
+        if (!timeFormatRegex.test(ratingData.startTimeStr) || !timeFormatRegex.test(ratingData.endTimeStr)) {
+            alert('Пожалуйста, введите время в формате мм:сс (например 1:23 или 01:23)');
             return false;
         }
 
