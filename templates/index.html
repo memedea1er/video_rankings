@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/video-player.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/ratings-table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/rating-controls.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/pagination-controls.css') }}">
 </head>
 <body>
     <div class="main-container">
@@ -27,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <ul class="video-list">
+            <ul class="video-list" id="video-list">
                 {% for video in videos %}
                 <li class="video-item" data-rated="{{ ratings.get(video, 0)|int >= 1 }}" data-video="{{ video }}">
                     <span class="video-title">{{ video }}</span>
@@ -41,6 +42,17 @@
                 </li>
                 {% endfor %}
             </ul>
+                <div class="pagination-controls" id="pagination-container">
+                    <div class="pagination-center">
+                        <button id="prev-page" class="page-btn">Предыдущая</button>
+                        <span id="page-info">Страница 1</span>
+                        <button id="next-page" class="page-btn">Следующая</button>
+                    </div>
+                    <div class="pagination-right">
+                        <label><input id="page-input" class="page-input" type="number" placeholder="1..."></label>
+                        <button id="to-page" class="page-btn">Перейти</button>
+                    </div>
+                </div>
         </div>
 
         <div class="video-container" id="video-container">

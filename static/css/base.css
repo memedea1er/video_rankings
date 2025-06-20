@@ -37,7 +37,7 @@ body {
 .file-list-container {
     flex: 1;
     background: white;
-    padding: 0 20px 20px 20px;
+    padding: 0 20px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow-y: auto;

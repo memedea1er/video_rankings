@@ -1,26 +1,60 @@
 const videoListModule = (function() {
-    let items = [];
+    let allItems = [];
+    let currentItems = [];
     let buttons = [];
+    let currentPage = 1;
+    let totalPages = null;
+    const itemsPerPage = 3;
+    let currentFilter = 'all';
 
     function init(filterButtons, videoItems) {
-        items = videoItems;
+        allItems = Array.from(videoItems);
         buttons = filterButtons;
         setupEventListeners();
         setupFilterButtons();
+        setupPagination();
+        updateDisplay();
     }
 
     function setupEventListeners() {
-        items.forEach(item => {
-            item.addEventListener('click', function(e) {
-                if (e.target.classList.contains('delete-rating-btn') ||
-                    e.target.tagName === 'BUTTON' ||
-                    e.target.tagName === 'INPUT') {
-                    return;
-                }
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                updateDisplay();
+            }
+        });
 
-                const videoFile = this.dataset.video;
-                videoPlayerModule.playVideo(videoFile);
-            });
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('to-page').addEventListener('click', function() {
+            const inputPage = document.getElementById('page-input').value;
+            console.log(inputPage)
+            if (inputPage > 0 && inputPage <= totalPages) {
+                currentPage = inputPage;
+                updateDisplay();
+            }
+            else {
+                alert(`Введите номер страницы от 1 до ${totalPages}`);
+            }
+        });
+
+        document.getElementById('video-list').addEventListener('click', function(e) {
+            const item = e.target.closest('.video-item');
+            if (!item) return;
+
+            if (e.target.classList.contains('delete-rating-btn') ||
+                e.target.tagName === 'BUTTON' ||
+                e.target.tagName === 'INPUT') {
+                return;
+            }
+
+            const videoFile = item.dataset.video;
+            videoPlayerModule.playVideo(videoFile);
         });
     }
 
@@ -30,16 +64,56 @@ const videoListModule = (function() {
                 buttons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
 
-                const filter = this.dataset.filter;
-                filterVideos(filter);
+                currentFilter = this.dataset.filter;
+                currentPage = 1;
+                updateDisplay();
             });
         });
     }
 
-    function updateVideoStatus(videoName) {
-        const item = Array.from(items).find(item => item.dataset.video === videoName);
-        if (!item) return;
+    function setupPagination() {
+        document.getElementById('prev-page').disabled = currentPage <= 1;
+        document.getElementById('next-page').disabled = currentPage >= totalPages;
+    }
 
+    function updateDisplay() {
+        currentItems = allItems.filter(item => {
+            const videoName = item.dataset.video;
+            const hasRatings = videoRatingsModule.hasRatings(videoName);
+            const needsVerificationCount = hasRatings ?
+                videoRatingsModule.getVerificationCount(videoName) : 0;
+
+            switch (currentFilter) {
+                case 'all': return true;
+                case 'rated': return hasRatings;
+                case 'unrated': return !hasRatings;
+                case 'needs-verification': return needsVerificationCount > 0;
+                default: return true;
+            }
+        });
+
+        totalPages = Math.ceil(currentItems.length / itemsPerPage);
+        document.getElementById('page-info').textContent = `Страница ${currentPage} из ${totalPages}`;
+        document.getElementById('prev-page').disabled = currentPage === 1;
+        document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+        document.getElementById('page-input').placeholder = `1...${totalPages}`;
+
+        allItems.forEach(item => item.style.display = 'none');
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageItems = currentItems.slice(startIndex, endIndex);
+
+        pageItems.forEach(item => {
+            item.style.display = 'flex';
+            updateItemStatus(item);
+        });
+
+        setupPagination();
+    }
+
+    function updateItemStatus(item) {
+        const videoName = item.dataset.video;
         const hasRatings = videoRatingsModule.hasRatings(videoName);
         const needsVerificationCount = hasRatings ?
             videoRatingsModule.getVerificationCount(videoName) : 0;
@@ -64,30 +138,21 @@ const videoListModule = (function() {
         }
     }
 
+    function updateVideoStatus(videoName) {
+        const item = allItems.find(item => item.dataset.video === videoName);
+        if (!item) return;
+
+        updateItemStatus(item);
+
+        if (item.style.display === 'flex') {
+            updateDisplay();
+        }
+    }
+
     function filterVideos(filter) {
-        items.forEach(item => {
-            const videoName = item.dataset.video;
-            const hasRatings = videoRatingsModule.hasRatings(videoName);
-            const needsVerificationCount = hasRatings ?
-                videoRatingsModule.getVerificationCount(videoName) : 0;
-
-            switch (filter) {
-                case 'all':
-                    item.style.display = 'flex';
-                    break;
-                case 'rated':
-                    item.style.display = hasRatings ? 'flex' : 'none';
-                    break;
-                case 'unrated':
-                    item.style.display = hasRatings ? 'none' : 'flex';
-                    break;
-                case 'needs-verification':
-                    item.style.display = needsVerificationCount > 0 ? 'flex' : 'none';
-                    break;
-            }
-
-            updateVideoStatus(videoName, hasRatings, needsVerificationCount);
-        });
+        currentFilter = filter;
+        currentPage = 1;
+        updateDisplay();
     }
 
     return {
